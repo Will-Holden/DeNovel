@@ -29,7 +29,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'wxcloudrun'
+    'wxcloudrun',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -75,8 +76,13 @@ DATABASES = {
         'PASSWORD': os.environ.get("MYSQL_PASSWORD"),
         'OPTIONS': {'charset': 'utf8mb4'},
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # }
 }
-
+appid = os.environ.get('APPID')
+appsecret = os.environ.get('APPSecret')
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -165,6 +171,14 @@ LOGGING = {
         },
     }
 }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+# AUTH_USER_MODEL = 'wxcloudrun.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

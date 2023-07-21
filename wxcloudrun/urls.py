@@ -16,11 +16,16 @@ Including another URLconf
 
 from wxcloudrun import views
 from django.conf.urls import url
+from django.contrib import admin
+from django.urls import path
+from wxcloudrun.views import WeixinLogin, UserData
 
 urlpatterns = (
     # 计数器接口
-    url(r'^^api/count(/)?$', views.counter),
-
+    # url(r'^^api/count(/)?$', views.counter),
+    path('manage/', admin.site.urls),
+    path('login/', WeixinLogin.as_view(), name='login'),
+    path('data/', UserData.as_view(), name='data'),
     # 获取主页
-    url(r'(/)?$', views.index),
+    # url(r'(/)?$', views.index),
 )

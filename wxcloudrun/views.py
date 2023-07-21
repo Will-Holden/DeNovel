@@ -1,12 +1,14 @@
 import json
 import logging
-
+import requests
 from django.http import JsonResponse
 from django.shortcuts import render
 from wxcloudrun.models import Counters
-
+from django.contrib.auth.models import User
+from wxcloudrun.settings import appid,appsecret
 
 logger = logging.getLogger('log')
+
 
 
 def index(request, _):
@@ -89,3 +91,79 @@ def update_count(request):
     else:
         return JsonResponse({'code': -1, 'errorMsg': 'action参数错误'},
                     json_dumps_params={'ensure_ascii': False})
+
+# def login(request, *args, **kwargs):
+#     return render(request, 'index.html')
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+from wxcloudrun.models import Score, Work
+
+
+# 获取用户数据
+class UserData(APIView):
+    # 鉴权方式
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        print('Get data:', request.user.username)
+        scores = Score.objects.filter(openid=request.user.username)
+        scores = list(scores)
+        totalScore = sum([item.score for item in scores])
+        works = [
+            {'id': item.work.id, 'work': item.work.worktitle, 'score': item.score} for item in scores
+        ]
+        return Response({'code': 'Authenticated.', 'score': totalScore, 'works' : works})
+
+class WeixinLogin(APIView):
+    def get(self, request, format=None):
+        """
+        提供 get 请求
+        """
+        return Response({"data": "hello world."})
+
+    def post(self, request, format=None):
+        """
+        提供 post 请求
+        """
+        # 从请求中获得code
+        code = json.loads(request.body).get('code')
+
+
+        # 微信接口服务地址
+        base_url = 'https://api.weixin.qq.com/sns/jscode2session'
+        # 微信接口服务的带参数的地址
+        url = base_url + "?appid=" + appid + "&secret=" + appsecret + "&js_code=" + code + "&grant_type=authorization_code"
+        response = requests.get(url)
+
+        # 处理获取的 openid
+        try:
+            openid = response.json()['openid']
+            session_key = response.json()['session_key']
+        except KeyError:
+            return Response({'code': 'fail'})
+        else:
+            # 打印到后端命令行
+            print(openid, session_key)
+            try:
+                user = User.objects.get(username=openid)
+            except User.DoesNotExist:
+                user = None
+
+            if user:
+                user = User.objects.get(username=openid)
+            else:
+                user = User.objects.create(
+                    username=openid,
+                    password=openid
+                )
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                    'code': 'success',
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token)
+                })

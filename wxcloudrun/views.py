@@ -116,7 +116,7 @@ class UserData(APIView):
         works = [
             {'id': item.work.id, 'work': item.work.worktitle, 'score': item.score} for item in scores
         ]
-        return Response({'code': 'Authenticated.', 'score': totalScore, 'works' : works})
+        return Response({'code': 'Authenticated.', 'score': totalScore, 'works' : works, 'userid':request.user.username})
 
 class WeixinLogin(APIView):
     def get(self, request, format=None):

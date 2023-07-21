@@ -131,39 +131,40 @@ class WeixinLogin(APIView):
         """
         # 从请求中获得code
         code = json.loads(request.body).get('code')
+        openid = request.headers['X-WX-OPENID']
 
 
         # 微信接口服务地址
-        base_url = 'https://api.weixin.qq.com/sns/jscode2session'
+        # base_url = 'https://api.weixin.qq.com/sns/jscode2session'
         # 微信接口服务的带参数的地址
-        url = base_url + "?appid=" + appid + "&secret=" + appsecret + "&js_code=" + code + "&grant_type=authorization_code"
-        response = requests.get(url)
+        # url = base_url + "?appid=" + appid + "&secret=" + appsecret + "&js_code=" + code + "&grant_type=authorization_code"
+        # response = requests.get(url)
 
         # 处理获取的 openid
-        try:
-            openid = response.json()['openid']
-            session_key = response.json()['session_key']
-        except KeyError:
-            return Response({'code': 'fail'})
-        else:
+        # try:
+            # openid = response.json()['openid']
+            # session_key = response.json()['session_key']
+        # except KeyError:
+            # return Response({'code': 'fail'})
+        # else:
             # 打印到后端命令行
-            print(openid, session_key)
-            try:
-                user = User.objects.get(username=openid)
-            except User.DoesNotExist:
-                user = None
+        print(openid)
+        try:
+            user = User.objects.get(username=openid)
+        except User.DoesNotExist:
+            user = None
 
-            if user:
-                user = User.objects.get(username=openid)
-            else:
-                user = User.objects.create(
-                    username=openid,
-                    password=openid
-                )
-            refresh = RefreshToken.for_user(user)
+        if user:
+            user = User.objects.get(username=openid)
+        else:
+            user = User.objects.create(
+                username=openid,
+                password=openid
+            )
+        refresh = RefreshToken.for_user(user)
 
-            return Response({
-                    'code': 'success',
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token)
-                })
+        return Response({
+                'code': 'success',
+                'refresh': str(refresh),
+                'access': str(refresh.access_token)
+        })

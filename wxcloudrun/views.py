@@ -100,7 +100,7 @@ from rest_framework.response import Response
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
-from wxcloudrun.models import Score, Work
+from wxcloudrun.models import Score, Work, UserProfile
 
 
 # 获取用户数据
@@ -114,12 +114,31 @@ class UserData(APIView):
         scores = list(scores)
         totalScore = sum([item.score for item in scores])
         works = [
-            {'id': item.work.id, 'work': item.work.worktitle, 'score': item.score} for item in scores
+            {'id': item.work.id, 'work': item.work.worktitle, 'proportion': item.proportion, 'score': item.score} for item in scores
         ]
-        return Response({'code': 'Authenticated.', 'score': totalScore, 'works' : works, 'userid':request.user.username})
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+        user = {
+            'nickname': profile.nickname,
+            'avatarUrl': profile.avatar,
+        }
+        return Response({'code': 'Authenticated.', 'score': totalScore, 'works' : works, 'profile': user, 'userid':request.user.username})
+
+        
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        print('Get data:', request.user.username)
+        profile,created = UserProfile.objects.get_or_create(user=request.user)
+        nickname = json.loads(request.body).get('nickname')
+        profile.nickname = nickname
+        profile.save()
+        return Response({'code': 'success'})
 
 class WeixinLogin(APIView):
+
     def get(self, request, format=None):
+
         """
         提供 get 请求
         """
@@ -131,23 +150,27 @@ class WeixinLogin(APIView):
         """
         # 从请求中获得code
         code = json.loads(request.body).get('code')
+
+        # for docker
         openid = request.headers['X-WX-OPENID']
 
 
-        # 微信接口服务地址
+        # # 微信接口服务地址
         # base_url = 'https://api.weixin.qq.com/sns/jscode2session'
-        # 微信接口服务的带参数的地址
+        # # 微信接口服务的带参数的地址
         # url = base_url + "?appid=" + appid + "&secret=" + appsecret + "&js_code=" + code + "&grant_type=authorization_code"
         # response = requests.get(url)
 
-        # 处理获取的 openid
+        # # 处理获取的 openid
         # try:
-            # openid = response.json()['openid']
-            # session_key = response.json()['session_key']
+        #     openid = response.json()['openid']
+        #     session_key = response.json()['session_key']
         # except KeyError:
-            # return Response({'code': 'fail'})
-        # else:
-            # 打印到后端命令行
+        #     return Response({'code': 'fail'})
+        # # else:
+        #     # 打印到后端命令行
+
+
         print(openid)
         try:
             user = User.objects.get(username=openid)

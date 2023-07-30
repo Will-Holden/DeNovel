@@ -18,7 +18,7 @@ from wxcloudrun import views
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path
-from wxcloudrun.views import WeixinLogin, UserData
+from wxcloudrun.views import WeixinLogin, UserData, UserProfileView
 
 urlpatterns = (
     # 计数器接口
@@ -26,6 +26,7 @@ urlpatterns = (
     path('manage/', admin.site.urls),
     path('login/', WeixinLogin.as_view(), name='login'),
     path('data/', UserData.as_view(), name='data'),
+    path('proflie/', UserProfileView.as_view(), name='proflie'),
     # 获取主页
     # url(r'(/)?$', views.index),
 )

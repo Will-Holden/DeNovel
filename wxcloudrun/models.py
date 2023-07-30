@@ -1,11 +1,10 @@
 from datetime import datetime
 from django.db import models
-# from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Counters(models.Model):
-    id = models.AutoField
-    count = models.IntegerField(max_length=11, default=0)
+    count = models.IntegerField(default=0)
     createdAt = models.DateTimeField(default=datetime.now(), )
     updatedAt = models.DateTimeField(default=datetime.now(),)
 
@@ -15,6 +14,13 @@ class Counters(models.Model):
     class Meta:
         db_table = 'Counters'  # 数据库表名
 
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, related_name="profile", on_delete=models.CASCADE)
+    phone_num = models.CharField(max_length=20, unique=True, blank=True)
+    nickname = models.CharField(max_length=50, unique=True, blank=True, default="微信用户")
+    avatar = models.CharField(max_length=500, default='')
+    
 
 # class User(AbstractUser):
 #     id = models.AutoField
@@ -31,10 +37,19 @@ class Counters(models.Model):
 #         verbose_name = '用户'
 #         verbose_name_plural = verbose_name
 
+class WorkGroup(models.Model):
+    workgroup = models.CharField(max_length=50)
+    createdAt = models.DateTimeField(default=datetime.now(), )
+    updatedAt = models.DateTimeField(default=datetime.now(),)
+
+    class Meta:
+        db_table = 'workgroup'
+        verbose_name = '工会'
+        verbose_name_plural = verbose_name
+
 class Work(models.Model):
-    id = models.AutoField
     worktitle = models.CharField(max_length=50)
-    gold = models.IntegerField(max_length=11, default=0)
+    gold = models.FloatField(default=0)
 
 
     class Meta:
@@ -43,8 +58,8 @@ class Work(models.Model):
         verbose_name_plural = verbose_name
         
 class Score(models.Model):
-    id = models.AutoField
-    score = models.IntegerField(max_length=11, default=0)
+    score = models.FloatField(default=0)
+    proportion = models.FloatField(default=0)
     openid = models.CharField(max_length=50)
     worktitle = models.CharField(max_length=50)
     work = models.ForeignKey(Work, on_delete=models.CASCADE, default='')

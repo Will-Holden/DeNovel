@@ -26,7 +26,7 @@ urlpatterns = (
     path('manage/', admin.site.urls),
     path('login/', WeixinLogin.as_view(), name='login'),
     path('data/', UserData.as_view(), name='data'),
-    path('proflie/', UserProfileView.as_view(), name='proflie'),
+    path('profile/', UserProfileView.as_view(), name='profile'),
     # 获取主页
     # url(r'(/)?$', views.index),
 )

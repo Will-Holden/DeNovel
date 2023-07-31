@@ -18,7 +18,7 @@ class Counters(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name="profile", on_delete=models.CASCADE)
     phone_num = models.CharField(max_length=20, blank=True)
-    nickname = models.CharField(max_length=50, unique=True, blank=True, default="微信用户")
+    nickname = models.CharField(max_length=50, blank=True, default="微信用户")
     avatar = models.CharField(max_length=500, default='')
     
 
